@@ -1,0 +1,375 @@
+/* ============================================================
+   MY COURSE PAGE + Course AI recommendations
+   Extracted from the referenced project's option-two.css —
+   only the course-page styles, layered on top of catalog-ai.css.
+   ============================================================ */
+
+/* Active "My Course" in the sidebar nested list */
+.sb-sub-item.active {
+  background: var(--blue-2);
+  color: var(--blue-6);
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+/* Dark tooltip (course AI fab) */
+.tb-tooltip {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translate(-50%, 4px);
+  background: var(--grey-10);
+  color: var(--white);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.35;
+  padding: 8px 12px;
+  border-radius: 8px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 200;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+  transition: opacity var(--dur-fast) var(--ease-standard), transform var(--dur-fast) var(--ease-standard);
+}
+.tb-tooltip::before {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-bottom-color: var(--grey-10);
+}
+.course-ai-fab:hover .tb-tooltip,
+.course-ai-fab:focus-visible .tb-tooltip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ============================================================
+   MY COURSE PAGE
+   ============================================================ */
+.course-page {
+  padding: 32px 0 0;
+  min-height: 100vh;
+}
+.course-page-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 0 64px;
+  gap: 16px;
+}
+.course-page-top h1 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--grey-10);
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+.course-students-view {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--blue-1);
+  color: var(--blue-6);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.course-students-view:hover { background: var(--blue-2); }
+.course-students-view svg, .course-students-view .icon { width: 16px !important; height: 16px !important; }
+
+.course-tabs {
+  display: flex;
+  gap: 28px;
+  padding: 0 64px;
+  margin-top: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.course-tab {
+  padding: 10px 6px 14px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--grey-9);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.course-tab:hover { color: var(--grey-10); }
+.course-tab.active {
+  color: var(--blue-6);
+  border: 1px solid var(--blue-5);
+  border-radius: 8px;
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--blue-5);
+  margin-bottom: 4px;
+}
+
+.course-content {
+  background: var(--bg-subtle);
+  padding: 24px 64px 80px;
+}
+
+.course-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.course-ai-fab {
+  position: relative;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #3FA9FF 0%, #0A6FD0 55%, #043E84 100%);
+  color: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(4,62,132,0.4);
+  transition: transform var(--dur-fast) var(--ease-standard), filter var(--dur-fast) var(--ease-standard);
+}
+.course-ai-fab:hover { transform: translateY(-1px); filter: brightness(1.08); }
+.course-ai-fab:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(51,162,255,0.6); }
+.course-ai-fab svg { width: 22px; height: 22px; }
+.course-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--white);
+  border: 1px solid var(--border-default);
+  color: var(--grey-10);
+  border-radius: 999px;
+  padding: 9px 18px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.course-pill-btn:hover { border-color: var(--blue-6); }
+.course-kebab {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px;
+  color: var(--grey-9);
+}
+.course-kebab:hover { background: var(--grey-2); }
+
+/* Unit folder */
+.cf-unit {
+  background: var(--white);
+  border: 1px solid var(--grey-3);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+.cf-unit-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.cf-unit-folder {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: var(--grey-1);
+  color: var(--grey-7);
+  display: flex; align-items: center; justify-content: center;
+}
+.cf-unit-folder svg, .cf-unit-folder .icon { width: 18px !important; height: 18px !important; }
+.cf-unit-title {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--grey-10);
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+.cf-unit-actions { display: flex; gap: 6px; }
+.cf-icon-btn {
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px;
+  color: var(--grey-8);
+}
+.cf-icon-btn:hover { background: var(--grey-2); color: var(--grey-10); }
+.cf-icon-btn svg, .cf-icon-btn .icon { width: 17px !important; height: 17px !important; }
+
+.cf-sim {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 14px;
+  background: var(--white);
+  border: 1px solid var(--grey-3);
+  border-radius: 14px;
+}
+.cf-sim + .cf-sim { margin-top: 12px; }
+.cf-sim-grip { color: var(--grey-5); display: flex; flex-shrink: 0; }
+.cf-sim-grip svg, .cf-sim-grip .icon { width: 16px !important; height: 16px !important; }
+.cf-sim-thumb {
+  width: 112px; height: 70px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  background-image: url("assets/sim-thumb.png");
+  background-size: cover;
+  background-position: center;
+}
+.cf-sim-main { flex: 1; min-width: 0; }
+.cf-sim-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--grey-10);
+  margin: 0 0 8px;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.cf-sim-meta { display: flex; align-items: center; gap: 12px; }
+.cf-sim-dur {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--grey-8);
+  background: var(--grey-1);
+  border: 1px solid var(--grey-3);
+  border-radius: 999px;
+  padding: 3px 12px;
+}
+.cf-sim-platforms { display: inline-flex; gap: 7px; color: var(--grey-7); }
+.cf-sim-platforms svg, .cf-sim-platforms .icon { width: 15px !important; height: 15px !important; }
+.cf-sim-right { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+.cf-text-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: 0;
+  color: var(--grey-9);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.cf-text-action:hover { color: var(--blue-6); }
+.cf-text-action svg, .cf-text-action .icon { width: 15px !important; height: 15px !important; }
+.cf-publish {
+  background: var(--blue-6);
+  color: var(--white);
+  border-radius: 8px;
+  padding: 9px 22px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.cf-publish:hover { background: var(--blue-7); }
+
+/* ============================================================
+   COURSE — AI RECOMMENDATIONS
+   ============================================================ */
+.crec {
+  background: var(--bg-subtle);
+  padding: 24px 64px 80px;
+  min-height: 60vh;
+}
+.crec-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 0;
+  color: var(--grey-10);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 10px 8px 0;
+  margin-bottom: 8px;
+}
+.crec-back:hover { color: var(--blue-7); }
+.crec-back svg, .crec-back .icon { width: 18px !important; height: 18px !important; }
+.crec-spark { text-align: center; margin: 12px 0 24px; }
+.crec-spark svg { width: 42px; height: 42px; }
+.crec-warning {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  background: #FEF7E0;
+  border: 1px solid #F0DDAD;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #6E5114;
+  margin-bottom: 24px;
+  max-width: 1056px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.crec-warning svg, .crec-warning .icon { width: 18px !important; height: 18px !important; color: #B9821B !important; flex-shrink: 0; }
+.crec-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 1056px;
+  margin: 0 auto;
+}
+.crec-card {
+  display: grid;
+  grid-template-columns: 220px 1fr auto;
+  align-items: center;
+  gap: 0;
+  background: var(--white);
+  border: 1px solid var(--grey-3);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: border-color var(--dur-fast) var(--ease-standard), box-shadow var(--dur-fast) var(--ease-standard);
+}
+.crec-card:hover { border-color: var(--blue-5); box-shadow: var(--shadow-2); }
+.crec-thumb {
+  align-self: stretch;
+  min-height: 128px;
+  background-image: url("assets/sim-thumb.png");
+  background-size: cover;
+  background-position: center;
+}
+.crec-body { padding: 20px 24px; min-width: 0; }
+.crec-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--grey-10);
+  margin: 0 0 6px;
+  letter-spacing: -0.2px;
+  line-height: 1.25;
+}
+.crec-desc {
+  font-size: 14px;
+  color: var(--grey-8);
+  line-height: 1.5;
+  margin: 0 0 12px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.crec-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.crec-cta { padding: 22px 24px; }
+.crec-feedback {
+  display: flex;
+  justify-content: flex-end;
+  gap: 18px;
+  max-width: 1056px;
+  margin: 28px auto 0;
+}
+.crec-fb {
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 10px;
+  color: var(--grey-8);
+}
+.crec-fb:hover { background: var(--grey-2); color: var(--grey-10); }
+.crec-fb.up.on { background: var(--green-1); color: var(--green-7); }
+.crec-fb.down.on { background: var(--red-1); color: var(--red-7); }
+.crec-fb svg, .crec-fb .icon { width: 20px !important; height: 20px !important; }
+
+@media (max-width: 720px) {
+  .crec-card { grid-template-columns: 1fr; }
+  .crec-thumb { height: 140px; }
+}
