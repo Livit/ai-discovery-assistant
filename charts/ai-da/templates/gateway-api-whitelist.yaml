@@ -1,0 +1,16 @@
+{{- if and .Values.gatewayApi.enabled .Values.gatewayApi.hostname .Values.gatewayApi.whitelistCIDRs.enabled .Values.gatewayApi.whitelistCIDRs.cidrs -}}
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: {{ template "gateway-api.fullname" . }}-whitelist
+spec:
+  acl:
+    defaultAction: deny
+    rules:
+      - name: allow-whitelist
+        cidrs:
+          {{- toYaml .Values.gatewayApi.whitelistCIDRs.cidrs | nindent 10 }}
+        action: allow
+    denyResponse:
+      {{- toYaml .Values.gatewayApi.whitelistCIDRs.denyResponse | nindent 6 }}
+{{- end -}}
