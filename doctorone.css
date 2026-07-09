@@ -495,14 +495,11 @@
 }
 .ai-warning-banner {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--yellow-1);
-  border: 1px solid var(--yellow-3);
-  border-radius: 8px;
-  padding: 12px 16px;
-  font-size: 14px;
-  color: var(--grey-10);
+  justify-content: flex-end;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--grey-9);
+  margin-bottom: 4px;
 }
 .ai-warning-ico { display: inline-flex; }
 
@@ -624,6 +621,84 @@
   line-height: 1.5;
   margin: 2px 2px 4px;
   text-wrap: pretty;
+}
+/* One-tap refinement (frictionless flow) — sits under the recommendations */
+.ai-refine {
+  margin: 20px 2px 4px;
+  padding: 18px 20px;
+  border: 1.5px solid var(--blue-6);
+  border-radius: 14px;
+  background: var(--blue-1, #EAF4FF);
+}
+.ai-refine-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.ai-refine-spark { display: inline-flex; }
+.ai-refine-spark svg { width: 18px !important; height: 18px !important; }
+.ai-refine-prompt {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--grey-10, #0B2240);
+}
+.ai-refine-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.ai-refine-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.ai-refine-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1.5px solid var(--blue-6);
+  background: #fff;
+  color: var(--blue-7);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease-standard);
+}
+.ai-refine-chip svg, .ai-refine-chip .icon {
+  width: 15px !important; height: 15px !important;
+}
+.ai-refine-chip:hover {
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(0, 111, 204, 0.18);
+}
+.ai-refine-chip.is-on {
+  background: var(--blue-6);
+  color: #fff;
+  border-color: var(--blue-6);
+}
+.ai-refine-apply {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 22px;
+  border-radius: 999px;
+  border: none;
+  background: var(--blue-6);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease-standard);
+}
+.ai-refine-apply:hover:not(:disabled) { filter: brightness(0.94); }
+.ai-refine-apply:disabled {
+  background: var(--grey-3);
+  color: var(--grey-7);
+  cursor: not-allowed;
 }
 .ai-sim-skel {
   display: inline-block;

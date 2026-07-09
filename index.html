@@ -47,7 +47,8 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "density": "comfortable",
   "primaryColor": "#006FCC",
   "showRecommended": true,
-  "describeMode": "live"
+  "describeMode": "live",
+  "flowMode": "frictionless"
 }/*EDITMODE-END*/;
 
 function App() {
@@ -75,6 +76,10 @@ function App() {
   useEffect(() => {
     window.__LP_DESCRIBE_MODE = t.describeMode || "live";
   }, [t.describeMode]);
+
+  useEffect(() => {
+    window.__LP_FLOW_MODE = t.flowMode || "frictionless";
+  }, [t.flowMode]);
 
   function onAccountAction(action) {
     if (action === "logout") alert("Logged out (demo)");

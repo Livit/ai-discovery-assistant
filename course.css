@@ -292,18 +292,12 @@
 .crec-spark svg { width: 42px; height: 42px; }
 .crec-warning {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 20px;
-  background: #FEF7E0;
-  border: 1px solid #F0DDAD;
-  border-radius: 10px;
-  font-size: 14px;
-  color: #6E5114;
-  margin-bottom: 24px;
+  justify-content: flex-end;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--grey-9);
+  margin: 0 auto 16px;
   max-width: 1056px;
-  margin-left: auto;
-  margin-right: auto;
 }
 .crec-warning svg, .crec-warning .icon { width: 18px !important; height: 18px !important; color: #B9821B !important; flex-shrink: 0; }
 .crec-list {

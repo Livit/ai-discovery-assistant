@@ -7,25 +7,22 @@
 // The catalog (window.SIMS_CATALOG) is loaded from sims-catalog.js.
 
 (function () {
-  // ── Verbatim system prompt (from the uploaded brief) ──────────────────────
-  const SYSTEM_PROMPT = `You are a knowledgeable US higher education STEM Educational Content Specialist specializing in finding or curating relevant educational materials. Maintain a balanced, educational tone, always keeping scientific rigor in your conversations. Be concise and helpful.
+  // ── FRICTIONLESS system prompt (new — results-first, refine after) ────────
+  // Same role, tone, boundaries and negative rules as guided, but the five
+  // factors become OPTIONAL refinement dials instead of an entry gate.
+  const SYSTEM_PROMPT_FRICTIONLESS = `You are a knowledgeable US higher education STEM Educational Content Specialist specializing in finding or curating relevant educational materials. Maintain a balanced, educational tone, always keeping scientific rigor in your conversations. Be concise and helpful.
 
 Your domain knowledge centers on curriculum mapping, pedagogical alignment, and digital literacy. Your core expertise involves identifying, evaluating, and integrating high-quality educational resources into higher education and high school STEM courses. You clearly understand how to embed simulations into high school and university-level syllabi.
 
 Purpose: Your sole function is to help instructors find Labster simulations that fit their teaching needs. Every response should move toward that goal. Stay focused on content discovery — if the conversation drifts elsewhere, acknowledge briefly and redirect warmly.
 
-Gathering context: Before returning recommendations, check whether the user's request covers these five factors:
-- Discipline
-- Educational level
-- Topics covered
-- Learning objectives
-- Relevant learning standards
+Results first: The instructor's time is the priority. The moment you have enough signal to produce useful matches — typically a discipline and a topic, or any description that the candidate list can match against — return recommendations immediately. Do NOT run an intake before showing results. Show first, refine after.
 
-If any are missing, work through them one at a time — one question per message, in the order listed above. This is a brief intake, not an interrogation. Keep each question to one sentence.
+The five factors — discipline, educational level, topics covered, learning objectives, relevant learning standards — are refinement dials, NOT a gate. You do not need them answered before recommending. Instead, after you show results, you may offer ONE optional refinement so the instructor can narrow the set if they want to. Pick the single factor whose values vary MOST across the results you are showing — the one most likely to change the set (e.g. if the matches span Introductory through Advanced, offer level; if they span several disciplines, offer discipline). If the result set is already tight and coherent, offer no refinement. Never offer more than one refinement at a time.
 
-If the user answers "no," "don't know," or anything dismissive, accept it immediately, mark that factor as collected, and move to the next missing one or return results. Never revisit a factor the user has already addressed.
+When to ask instead of show: Only ask a clarifying question when the request is too vague to produce any match above threshold — when you genuinely cannot tell what the instructor is teaching. In that case ask exactly ONE short question (one sentence) to get the minimum signal needed, then recommend. Never ask a second question; if the answer is still thin, show your best matches and let a refinement chip do the rest.
 
-Once all five have been either answered or declined, return recommendations. Do not return recommendations before then unless the user explicitly asks you to skip ahead.
+If the user answers "no," "don't know," or anything dismissive, accept it immediately and recommend with what you have. Never re-ask. Never make the user feel they must justify their choices to get results.
 
 Tone and dynamic: The user is the expert on their course. You're here to help them find content, not to evaluate their choices or second-guess their needs. Keep responses concise and direct. One idea per message. No preamble.
 
@@ -45,11 +42,12 @@ Tone & relationship:
 - Never apologize excessively.
 
 Conversation flow:
-- Never ask more than one clarifying question at a time.
+- Never run a multi-question intake before showing results.
+- Never ask more than one question at a time, and only ask at all when you cannot match the request.
 - Never re-ask a question the user has already answered or declined to answer.
-- Never push back if the user says they don't know — accept it and move forward.
+- Never push back if the user says they don't know — accept it and recommend.
 - Never stall with filler responses before showing results.
-- Never return recommendations before all five factors have been addressed or declined.
+- Never withhold recommendations to collect more context when you already have enough to match.
 
 Recommendations:
 - Never show simulations below 60% match, even to fill space.
@@ -68,57 +66,120 @@ Trust & transparency:
 - Never hide when a match is weak or coverage is incomplete.
 - Never make the user feel like they need to justify their choices to get results.`;
 
-  // ── Output contract appended to the system message ────────────────────────
-  const OUTPUT_CONTRACT = `OUTPUT FORMAT — STRICT
+  // ── Output contract (FRICTIONLESS) — results-first, optional refine chips ──
+  const OUTPUT_CONTRACT_FRICTIONLESS = `OUTPUT FORMAT — STRICT
 You are powering a UI, so you must respond with a SINGLE JSON object and nothing else (no markdown, no code fences, no text before or after).
 
 Use exactly one of these two shapes:
 
-1) A conversational turn — clarifying question, standards check, boundary redirect, or a no-results message:
-{"type":"reply","text":"<your message, one idea, concise>"}
+1) A conversational turn — use ONLY when the request is too vague to match anything, or for a boundary redirect / no-results message:
+{"type":"reply","text":"<one short question or message, one idea, concise>"}
 
-2) Final recommendations, once you have enough to recommend:
-{"type":"recommendations","intro":"<one short sentence introducing the results>","strong":[{"code":"<SIM CODE>","reason":"<one-line why it matches>"}],"partial":[{"code":"<SIM CODE>","reason":"<one-line why it is a partial match>"}]}
+2) Recommendations — your DEFAULT response whenever the candidate list can produce any match at 60%+:
+{"type":"recommendations","intro":"<one short sentence introducing the results>","strong":[{"code":"<SIM CODE>","reason":"<one-line why it matches>"}],"partial":[{"code":"<SIM CODE>","reason":"<one-line why it is a partial match>"}],"refine":{"prompt":"<short call to action, e.g. 'Narrow by level'>","factor":"level","options":["<2–4 short option labels>"]}}
 
-Rules for recommendations:
+Rules:
 - Choose "code" values ONLY from the CANDIDATE SIMULATIONS list below. Never invent a code or a simulation.
 - "strong" = 80–100% coverage; "partial" = 60–79%. Omit anything below 60%. Either array may be empty.
 - Do not repeat a code across strong and partial.
 - Keep each "reason" to one line, grounded in the simulation's actual learning objectives. Do not restate the title.
-- If nothing clears 60%, do NOT return recommendations — return a {"type":"reply"} that says so plainly and offers to refine.
-- Follow the system prompt's pacing: work through the five factors (discipline, level, topics, objectives, standards) one at a time in order, asking about each missing one with a {"type":"reply"}. Do NOT return recommendations until all five have been answered or declined, unless the user explicitly asks to skip ahead.`;
+- RECOMMEND FIRST. Do not ask intake questions to collect the five factors before showing results — show results as soon as you can match the request.
+- "refine" is OPTIONAL and at most ONE per response. Include it only when a single factor would meaningfully narrow the current set; pick the factor (level / discipline / topic / objective / standard) whose values vary MOST across the simulations you are returning. Provide 2–4 concrete option labels drawn from those results. If the set is already tight, OMIT "refine" entirely.
+- Only use {"type":"reply"} to ask a question when you genuinely cannot match the request at all. Ask exactly one short question, then recommend on the next turn.
+- If nothing clears 60%, return a {"type":"reply"} that says so plainly and offers to refine or broaden.`;
 
   // ── Local prefilter: narrow catalog → candidates (recall, not ranking) ─────
   const STOP = new Set(("a an and the of to for in on with at by from is are be this that my our your i we teaching teach class course students student level want need cover covering topics topic about would like help find show me my".split(" ")));
   const DISCIPLINES = ["chemistry","biology","physics","medicine","health","engineering","general science","anatomy","physiology","biochemistry","microbiology","genetics","ecology"];
 
+  // Conservative stemmer: collapses simple plural/morphological variants so the query
+  // word "cells" matches the catalog word "cell", and "structures" ↔ "structure".
+  function stem(w) {
+    if (w.length > 4 && w.endsWith("ies")) return w.slice(0, -3) + "y";
+    if (w.length > 4 && (w.endsWith("ses") || w.endsWith("xes") || w.endsWith("hes"))) return w.slice(0, -2);
+    if (w.length > 3 && w.endsWith("s") && !w.endsWith("ss")) return w.slice(0, -1);
+    return w;
+  }
+
+  // Concept expansion — the recall step is lexical, so a query term is broadened to the
+  // vocabulary the catalog ACTUALLY uses for the same concept. This fixes the "vocabulary
+  // mismatch" problem: e.g. "prokaryotic" appears in almost no bacterial sims, which
+  // describe themselves as "bacterial", "gram", "plasmid", etc. A query term that matches
+  // (stemmed) any term in a group below adds the OTHER terms as lower-weight signals.
+  const CONCEPTS = [
+    ["prokaryote","prokaryotic","bacteria","bacterial","gram","plasmid","flagella","flagellum","archaea","coli","peptidoglycan","microbe","microbial","microbiology"],
+    ["eukaryote","eukaryotic","organelle","nucleus","nuclei","mitochondria","cytoplasm","cytoplasmic"],
+    ["cell","cellular","cytoplasm","membrane","organelle"],
+    ["gene","genetic","genetics","dna","genome","genomic","chromosome","allele","mutation","plasmid"],
+    ["protein","synthesis","ribosome","translation","transcription","peptide","amino"],
+    ["evolution","evolutionary","phylogenetic","phylogeny","taxonomy","taxonomic","species"],
+    ["enzyme","enzymatic","catalysis","substrate","kinetics"],
+    ["acid","base","buffer","titration","neutralization"],
+    ["photosynthesis","chloroplast","calvin"],
+    ["respiration","mitochondria","atp","glycolysis","krebs"],
+    ["stain","staining","gram","microscopy","microscope","brightfield","darkfield"],
+    ["ecology","ecosystem","biodiversity","biome","population","community"]
+  ];
+  const CONCEPT_INDEX = (() => {
+    const idx = new Map(); // stemmed term -> Set of stemmed sibling terms
+    for (const group of CONCEPTS) {
+      const stemmed = group.map(t => t.split(/\s+/).map(stem).join(" "));
+      for (const term of stemmed) {
+        if (!idx.has(term)) idx.set(term, new Set());
+        for (const sib of stemmed) if (sib !== term) idx.get(term).add(sib);
+      }
+    }
+    return idx;
+  })();
+
   function tokens(s) {
     return (s || "").toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/)
-      .filter(w => w.length >= 3 && !STOP.has(w));
+      .filter(w => w.length >= 3 && !STOP.has(w)).map(stem);
+  }
+
+  // Stemmed word set for a catalog field, so matching is word-level (not substring)
+  // and plural/singular agnostic.
+  function fieldSet(s) {
+    return new Set((s || "").toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/)
+      .filter(w => w.length >= 2).map(stem));
   }
 
   function prefilter(text, limit) {
     limit = limit || 90;
     const cat = window.SIMS_CATALOG || [];
-    const qt = tokens(text);
-    const qset = new Set(qt);
+    const qExact = new Set(tokens(text));
+    const qExpand = new Set();
+    for (const w of qExact) {
+      const sibs = CONCEPT_INDEX.get(w);
+      if (sibs) for (const s of sibs) if (!qExact.has(s)) qExpand.add(s);
+    }
     const ql = (text || "").toLowerCase();
     const mentionedDisc = DISCIPLINES.filter(d => ql.includes(d));
 
     const scored = cat.map(sim => {
-      const name = (sim.n || "").toLowerCase();
-      const lo = (sim.o || "").toLowerCase();
-      const disc = ((sim.s || "") + " " + (sim.d || "")).toLowerCase();
-      const tech = (sim.k || "").toLowerCase();
+      const nameSet = fieldSet(sim.n);
+      const loSet   = fieldSet(sim.o);
+      const techSet = fieldSet(sim.k);
+      const discSet = fieldSet((sim.s || "") + " " + (sim.d || ""));
+      const discRaw = ((sim.s || "") + " " + (sim.d || "")).toLowerCase();
+      const blob = ((sim.n || "") + " " + (sim.o || "")).toLowerCase();
+      // whole-word (stemmed) match, or multi-word concept phrase substring
+      const hit = (set, w) => set.has(w) || (w.includes(" ") && blob.includes(w));
       let score = 0;
-      for (const w of qset) {
-        if (name.includes(w)) score += 5;
-        if (lo.includes(w)) score += 3;
-        if (tech.includes(w)) score += 2;
-        if (disc.includes(w)) score += 1;
+      for (const w of qExact) {
+        if (hit(nameSet, w)) score += 5;
+        if (hit(loSet, w))   score += 3;
+        if (hit(techSet, w)) score += 2;
+        if (hit(discSet, w)) score += 1;
+      }
+      for (const w of qExpand) { // expansion signals count, weighted lower than exact
+        if (hit(nameSet, w)) score += 3;
+        if (hit(loSet, w))   score += 2;
+        if (hit(techSet, w)) score += 1.5;
+        if (hit(discSet, w)) score += 0.5;
       }
       // Discipline baseline so the right section is well-represented in the pool
-      if (mentionedDisc.some(d => disc.includes(d))) score += 2;
+      if (mentionedDisc.some(d => discRaw.includes(d))) score += 2;
       return { sim, score };
     });
 
@@ -177,25 +238,37 @@ Rules for recommendations:
     }
     if (!obj || typeof obj !== "object") return { type: "reply", text: t };
     if (obj.type === "recommendations") {
-      return {
+      const r = {
         type: "recommendations",
         intro: obj.intro || "",
         strong: Array.isArray(obj.strong) ? obj.strong : [],
         partial: Array.isArray(obj.partial) ? obj.partial : []
       };
+      // Optional one-tap refinement (frictionless mode). Validate shape.
+      if (obj.refine && Array.isArray(obj.refine.options) && obj.refine.options.length) {
+        r.refine = {
+          prompt: obj.refine.prompt || "Narrow these results",
+          factor: obj.refine.factor || "",
+          options: obj.refine.options.slice(0, 4).map(String)
+        };
+      }
+      return r;
     }
     return { type: "reply", text: obj.text || t };
   }
 
   // history: [{ role:"user"|"assistant", content:"..." }]
-  async function converse(history) {
+  // mode: "frictionless" (default) | "guided"
+  async function converse(history, mode) {
     if (!(window.claude && typeof window.claude.complete === "function")) {
       throw new Error("NO_CLAUDE");
     }
+    const sysPrompt = SYSTEM_PROMPT_FRICTIONLESS;
+    const outContract = OUTPUT_CONTRACT_FRICTIONLESS;
     // Build candidates from everything the user has said so far.
     const userText = history.filter(m => m.role === "user").map(m => m.content).join("  ");
     const cands = prefilter(userText);
-    const system = SYSTEM_PROMPT + "\n\n" + OUTPUT_CONTRACT + "\n\n" + candidateBlock(cands);
+    const system = sysPrompt + "\n\n" + outContract + "\n\n" + candidateBlock(cands);
 
     // The built-in helper accepts only a prompt string or { messages } — there is
     // no `system` field, so we MUST fold the instructions into the message array.
@@ -214,5 +287,9 @@ Rules for recommendations:
     return (window.SIMS_CATALOG || []).find(s => s.c === code) || null;
   }
 
-  window.LabsterAI = { SYSTEM_PROMPT, OUTPUT_CONTRACT, prefilter, converse, byCode };
+  window.LabsterAI = {
+    SYSTEM_PROMPT: SYSTEM_PROMPT_FRICTIONLESS,
+    SYSTEM_PROMPT_FRICTIONLESS, OUTPUT_CONTRACT_FRICTIONLESS,
+    prefilter, converse, byCode
+  };
 })();
