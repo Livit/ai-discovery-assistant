@@ -804,7 +804,7 @@ function CatalogPage() {
 
     const live =
       window.LabsterAI &&
-      window.claude && typeof window.claude.complete === "function" &&
+      window.LabsterAI.isAvailable() &&
       window.__LP_DESCRIBE_MODE !== "scripted";
 
     if (!live) { scriptedRoute(query); return; }
