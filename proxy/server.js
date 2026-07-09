@@ -4,6 +4,7 @@ import express from "express";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3001;
+const HOST = process.env.HOST || "127.0.0.1";
 
 app.use(express.json({ limit: "1mb" }));
 app.use(
@@ -62,6 +63,6 @@ app.post("/api/claude", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Claude proxy listening on http://localhost:${PORT}`);
+app.listen(PORT, HOST, () => {
+  console.log(`Claude proxy listening on http://${HOST}:${PORT}`);
 });

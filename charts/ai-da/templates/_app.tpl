@@ -6,6 +6,8 @@ app env settings
   value: production
 - name: PORT
   value: {{ .Values.service.port | quote }}
+- name: HOST
+  value: "0.0.0.0"
 - name: ANTHROPIC_API_KEY
   valueFrom:
     secretKeyRef:
