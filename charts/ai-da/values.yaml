@@ -143,16 +143,12 @@ gatewayApi:
     # prefix format:
     # - value: "/"
     #   type: PathPrefix
-    prefixes:
-      - type: RegularExpression
-        value: "(?i)^/api(/.*)?$"
-      - type: RegularExpression
-        value: "(?i)^/api-json(/.*)?$"
+    prefixes: []
     denyResponse:
       statusCode: 403
       blockedByHeaderName: X-Blocked-By-ACL
   robotsTxt:
-    enabled: false
+    enabled: true
     content: |
       User-agent: *
       Disallow: /
