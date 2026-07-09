@@ -700,6 +700,21 @@
   text-align: center;
   padding: 40px 28px;
 }
+.ai-search-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 56px 28px 72px;
+}
+.ai-search-loading h3 {
+  font-size: 22px; font-weight: 700; color: var(--grey-10);
+  margin: 4px 0 8px; letter-spacing: -0.3px;
+}
+.ai-search-loading p {
+  font-size: 14px; color: var(--grey-9); margin: 0;
+  max-width: 460px; line-height: 1.55;
+}
 .loading-orb {
   position: relative;
   width: 90px; height: 90px;
@@ -1654,14 +1669,10 @@
 /* AI warning — yellow inline message */
 .st-ai-warning {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 18px;
-  background: #FEF7E0;
-  border: 1px solid #F0DDAD;
-  border-radius: 10px;
-  font-size: 13.5px;
-  color: #6E5114;
+  justify-content: flex-end;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--grey-9);
   line-height: 1.5;
   margin-bottom: 20px;
 }
