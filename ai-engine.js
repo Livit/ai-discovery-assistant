@@ -257,10 +257,37 @@ Rules:
     return { type: "reply", text: obj.text || t };
   }
 
+  function proxyUrl() {
+    return (window.__LP_CLAUDE_PROXY_URL || "").trim();
+  }
+
+  function isAvailable() {
+    return (
+      (window.claude && typeof window.claude.complete === "function") ||
+      !!proxyUrl()
+    );
+  }
+
+  async function completeClaude(messages) {
+    if (window.claude && typeof window.claude.complete === "function") {
+      return window.claude.complete({ messages });
+    }
+    const url = proxyUrl();
+    if (!url) throw new Error("NO_CLAUDE");
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "PROXY_ERROR");
+    return data.text || "";
+  }
+
   // history: [{ role:"user"|"assistant", content:"..." }]
   // mode: "frictionless" (default) | "guided"
   async function converse(history, mode) {
-    if (!(window.claude && typeof window.claude.complete === "function")) {
+    if (!isAvailable()) {
       throw new Error("NO_CLAUDE");
     }
     const sysPrompt = SYSTEM_PROMPT_FRICTIONLESS;
@@ -278,7 +305,7 @@ Rules:
       i === 0 ? { role: m.role, content: primer + m.content } : { role: m.role, content: m.content }
     );
 
-    const raw = await window.claude.complete({ messages });
+    const raw = await completeClaude(messages);
     return parseResponse(raw);
   }
 
@@ -290,6 +317,6 @@ Rules:
   window.LabsterAI = {
     SYSTEM_PROMPT: SYSTEM_PROMPT_FRICTIONLESS,
     SYSTEM_PROMPT_FRICTIONLESS, OUTPUT_CONTRACT_FRICTIONLESS,
-    prefilter, converse, byCode
+    prefilter, converse, byCode, isAvailable
   };
 })();
