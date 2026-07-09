@@ -1,0 +1,28 @@
+{{- if and .Values.gatewayApi.enabled .Values.gatewayApi.hostname .Values.gatewayApi.listenerSet.enabled (not .Values.gatewayApi.listenerSet.ref) -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: ListenerSet
+metadata:
+  name: {{ template "gateway-api.fullname" $ }}
+  {{- with .Values.gatewayApi.listenerSet.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRef: {{- toYaml .Values.gatewayApi.listenerSet.parentRef | nindent 4 }}
+  listeners:
+    - name: https
+      hostname: "{{ .Values.gatewayApi.hostname }}"
+      port: 443
+      protocol: HTTPS
+      {{- if .Values.gatewayApi.listenerSet.allowedNamespacesSelector  }}
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            {{- toYaml .Values.gatewayApi.listenerSet.allowedNamespacesSelector | nindent 12 }}
+      {{- end }}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: {{ template "gateway-api.fullname" .}}-tls
+{{- end -}}
