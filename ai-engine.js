@@ -268,18 +268,35 @@ Rules:
     );
   }
 
+  function authToken() {
+    if (window.__LP_AUTH_TOKEN) return window.__LP_AUTH_TOKEN;
+    try {
+      return sessionStorage.getItem("lp_auth_token") || "";
+    } catch {
+      return "";
+    }
+  }
+
   async function completeClaude(messages) {
     if (window.claude && typeof window.claude.complete === "function") {
       return window.claude.complete({ messages });
     }
     const url = proxyUrl();
     if (!url) throw new Error("NO_CLAUDE");
+    const token = authToken();
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers.Authorization = "Bearer " + token;
     const res = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({ messages }),
     });
     const data = await res.json();
+    if (res.status === 401) {
+      try { sessionStorage.removeItem("lp_auth_token"); } catch {}
+      window.location.reload();
+      throw new Error("SESSION_EXPIRED");
+    }
     if (!res.ok) throw new Error(data.error || "PROXY_ERROR");
     return data.text || "";
   }

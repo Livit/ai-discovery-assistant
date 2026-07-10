@@ -1,0 +1,77 @@
+.lp-auth-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f6f7f8;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.lp-auth-card {
+  width: min(400px, calc(100vw - 32px));
+  padding: 32px;
+  background: #fff;
+  border: 1px solid #e1e3e6;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.lp-auth-title {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a1d21;
+}
+
+.lp-auth-sub {
+  margin: 0 0 24px;
+  font-size: 14px;
+  color: #5c6670;
+}
+
+.lp-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lp-auth-input {
+  padding: 12px 14px;
+  font-size: 15px;
+  border: 1px solid #c8ccd0;
+  border-radius: 8px;
+  outline: none;
+}
+
+.lp-auth-input:focus {
+  border-color: #006fcc;
+  box-shadow: 0 0 0 3px rgba(0, 111, 204, 0.15);
+}
+
+.lp-auth-error {
+  margin: 0;
+  font-size: 13px;
+  color: #c41e3a;
+}
+
+.lp-auth-btn {
+  padding: 12px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  background: #006fcc;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.lp-auth-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.lp-auth-btn:hover:not(:disabled) {
+  background: #005aad;
+}
