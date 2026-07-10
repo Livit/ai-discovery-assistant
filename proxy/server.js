@@ -8,6 +8,7 @@ const PORT = Number(process.env.PORT) || 3001;
 const ACCESS_PASSWORD = process.env.ACCESS_PASSWORD || "LabsterAI123";
 const SESSION_MS = Number(process.env.SESSION_MS) || 24 * 60 * 60 * 1000;
 const sessions = new Map();
+const HOST = process.env.HOST || "127.0.0.1";
 
 app.use(express.json({ limit: "1mb" }));
 app.use(
@@ -95,6 +96,6 @@ app.post("/api/claude", requireAuth, async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Claude proxy listening on http://localhost:${PORT}`);
+app.listen(PORT, HOST, () => {
+  console.log(`Claude proxy listening on http://${HOST}:${PORT}`);
 });
