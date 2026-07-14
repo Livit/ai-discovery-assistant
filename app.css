@@ -1495,3 +1495,9 @@ input, select, textarea { font-family: inherit; }
    Tweaks panel hookup
    ============================================================ */
 .lp-empty { padding: 80px 24px; text-align: center; color: var(--grey-8); }
+
+
+/* Shared back button — consistent across simulation pages, search results, syllabus & AI assistant */
+.lp-back-btn{display:inline-flex;align-items:center;gap:6px;background:none;border:none;padding:6px 4px;margin:0;cursor:pointer;color:#1B1F23;font-weight:700;font-size:14px;font-family:inherit;line-height:1;border-radius:8px;transition:color .15s ease}
+.lp-back-btn svg{width:18px;height:18px}
+.lp-back-btn:hover{color:var(--blue-6)}

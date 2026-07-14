@@ -21,12 +21,20 @@
 <link rel="stylesheet" href="catalog-ai.css"/>
 <link rel="stylesheet" href="doctorone.css"/>
 <link rel="stylesheet" href="course.css"/>
+<link rel="stylesheet" href="sim-detail.css"/>
 <link rel="stylesheet" href="auth-gate.css"/>
+<style>
+  .lp-click-ripple{position:fixed;top:0;left:0;z-index:2147483647;pointer-events:none;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:hsl(207,100%,80%);box-shadow:0 0 0 1px hsl(207,100%,60%/.5);opacity:.55;animation:lp-ripple 560ms cubic-bezier(.22,.61,.36,1) forwards}
+  @keyframes lp-ripple{0%{transform:scale(.35);opacity:.55}100%{transform:scale(4.5);opacity:0}}
+  @media (prefers-reduced-motion: reduce){.lp-click-ripple{animation-duration:1ms}}
+</style>
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/lucide@0.446.0/dist/umd/lucide.min.js"></script>
 <script src="sims-catalog.js"></script>
+<script src="sim-search-fields.js"></script>
+<script src="sim-search.js"></script>
 <script>
   window.__LP_CLAUDE_PROXY_URL = "https://ai-da.staging.labster.it/api/claude";
 </script>
@@ -42,6 +50,7 @@
 <script type="text/babel" src="sidebar.jsx"></script>
 <script type="text/babel" src="pages.jsx"></script>
 <script type="text/babel" src="catalog.jsx"></script>
+<script type="text/babel" src="sim-detail.jsx"></script>
 <script type="text/babel" src="course.jsx"></script>
 <script type="text/babel" src="doctorone.jsx"></script>
 <script type="text/babel" src="ux-overlay.jsx"></script>
@@ -141,6 +150,11 @@ function App() {
           </window.TweakSection>
           <window.TweakSection title="AI Catalog states">
             <window.TweakRadio
+              label="Conversation flow"
+              value={t.flowMode}
+              options={[{value:"frictionless",label:"Frictionless"},{value:"consultative",label:"Consultative"},{value:"guided",label:"Guided"}]}
+              onChange={v => setTweak("flowMode", v)}/>
+            <window.TweakRadio
               label="Describe what I am teaching"
               value={t.describeMode}
               options={[{value:"live",label:"Live AI"},{value:"scripted",label:"Scripted demo"}]}
@@ -184,6 +198,17 @@ function App() {
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+<script>
+// Global click-ripple for user-test observation — fires anywhere, interactive or not.
+document.addEventListener("pointerdown", (e) => {
+  const r = document.createElement("div");
+  r.className = "lp-click-ripple";
+  r.style.left = e.clientX + "px";
+  r.style.top = e.clientY + "px";
+  document.body.appendChild(r);
+  r.addEventListener("animationend", () => r.remove());
+}, true);
 </script>
 </body>
 </html>
