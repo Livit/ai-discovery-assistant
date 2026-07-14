@@ -208,10 +208,24 @@ function MetaBar({ sim }) {
 
 }
 
-function SimCard({ sim, state, onToggle, seed }) {
+// Map an assistant sim record → the shared search-result card's `item` shape.
+function aiSimItem(sim) {
+  return {
+    id: sim.id,
+    code: sim.code || sim.id,
+    title: sim.title,
+    description: sim.description,
+    level: (sim.level || "").split(/[,;]/)[0].trim(),
+    duration: sim.duration,
+    discipline: (sim.discipline || "").split(/[,;]/)[0].trim()
+  };
+}
+
+function SimCard({ sim, state, onToggle, seed, onOpen }) {
   // state: "add" | "added" | "in-course"
+  const open = onOpen ? () => onOpen(sim.code || sim.id) : undefined;
   return (
-    <article className="ai-sim-card">
+    <article className={`ai-sim-card${onOpen ? " ai-sim-card--clickable" : ""}`} onClick={open}>
       <SimImageThumb seed={seed || 0} />
       <div className="ai-sim-body">
         <h4 className="ai-sim-title">{sim.title}</h4>
@@ -221,7 +235,7 @@ function SimCard({ sim, state, onToggle, seed }) {
       <div className="ai-sim-cta">
         <button
           className={`ai-sim-btn ai-sim-btn--${state}`}
-          onClick={() => state !== "in-course" && onToggle && onToggle()}
+          onClick={(e) => { e.stopPropagation(); state !== "in-course" && onToggle && onToggle(); }}
           disabled={state === "in-course"}>
           {state === "in-course" && "Already in Course"}
           {state === "added" && <><IDr name="check" /> Added</>}
@@ -271,7 +285,7 @@ function MatchPill({ tone, label }) {
   return <span className={`ai-match-pill ai-match-pill--${tone}`}>{label}</span>;
 }
 
-function ResultGroup({ header, sims, getState, onAddAll, onToggle, baseSeed = 0 }) {
+function ResultGroup({ header, sims, getState, onAddAll, onToggle, baseSeed = 0, onOpen }) {
   return (
     <div className="ai-result-group">
       <div className="ai-result-group-head">
@@ -282,11 +296,11 @@ function ResultGroup({ header, sims, getState, onAddAll, onToggle, baseSeed = 0 
       </div>
       <div className="ai-sim-list">
         {sims.map((sim, i) =>
-        <SimCard
+        <window.ResultSimCard
           key={sim.id}
-          sim={sim}
-          seed={baseSeed + i}
+          item={aiSimItem(sim)}
           state={getState ? getState(sim) : "add"}
+          onOpen={onOpen}
           onToggle={() => onToggle && onToggle(sim.id)} />
         )}
       </div>
@@ -420,7 +434,7 @@ function RefineChips({ refine, onRefine }) {
 // AI RECOMMENDATIONS — Strong + Partial tiers from a live AI turn
 //   Each item is { sim (catalog record), reason (one-line why) }
 // ─────────────────────────────────────────────────────────────
-function AIRecs({ intro, strong, partial, refine, onRefine, addedSims, setAddedSims, onToggle }) {
+function AIRecs({ intro, strong, partial, refine, onRefine, addedSims, setAddedSims, onToggle, onOpen }) {
   const card = (it) => ({
     id: it.sim.c, code: it.sim.c, title: it.sim.n,
     description: it.reason, level: it.sim.l, duration: it.sim.t, discipline: it.sim.s
@@ -445,6 +459,7 @@ function AIRecs({ intro, strong, partial, refine, onRefine, addedSims, setAddedS
         getState={getState}
         onAddAll={() => addAll(strongCards)}
         onToggle={onToggle}
+        onOpen={onOpen}
         baseSeed={0} />
       }
       {partialCards.length > 0 &&
@@ -454,6 +469,7 @@ function AIRecs({ intro, strong, partial, refine, onRefine, addedSims, setAddedS
         getState={getState}
         onAddAll={() => addAll(partialCards)}
         onToggle={onToggle}
+        onOpen={onOpen}
         baseSeed={strongCards.length} />
       }
       {empty &&
@@ -469,7 +485,7 @@ function AIRecs({ intro, strong, partial, refine, onRefine, addedSims, setAddedS
 // ─────────────────────────────────────────────────────────────
 // MAIN PANEL
 // ─────────────────────────────────────────────────────────────
-function DoctorOnePanel({ onClose }) {
+function DoctorOnePanel({ onClose, onOpenSim }) {
   const { DRONE_COURSES, DRONE_SIM_POOL, DRONE_PREPARE_RECS, DRONE_ADD_TO_COURSE } = window.DR_ONE_DATA;
   const { SYLLABUS_COURSE } = window.AI_CATALOG_DATA;
 
@@ -521,8 +537,13 @@ function DoctorOnePanel({ onClose }) {
   // ── Start one of the flows from the start cards ──
   function startPrepare() {
     aiApiRef.current = [];
+    const flow = window.__LP_FLOW_MODE || "frictionless";
     const greeting =
-      "Tell me what you're teaching — a topic, course or discipline is enough to get matches. I'll show simulations right away and you can refine from there.";
+      flow === "guided"
+        ? "Describe what you're teaching — include the course or discipline, education level, key topics, or learning objectives."
+        : flow === "consultative"
+        ? "Tell me a bit about what you're teaching and what you're hoping students get out of it — I'll think it through with you and suggest a few simulations worth your time."
+        : "Tell me what you're teaching — a topic, course, or discipline works. I'll help track down matching simulations, and you'll be able to fine-tune from there.";
     setAiThread([{ kind: "bot", text: greeting }]);
     setAiBusy(false);
     setInput("");
@@ -628,9 +649,7 @@ function DoctorOnePanel({ onClose }) {
     <div className="ai-root" data-screen-label="05 AI Content Discovery">
       {/* Top action row: Back ⇠   New conversation ⇢ */}
       <div className="ai-actionrow">
-        <button className="ai-textlink" onClick={onClose}>
-          <IDr name="arrow-left" /> Back to Catalog
-        </button>
+        <window.BackButton onClick={onClose} label="Back to Catalog" />
         {!isIdle &&
         <button className="ai-textlink" onClick={resetAll}>
             <IDr name="rotate-cw" /> New Conversation
@@ -659,7 +678,7 @@ function DoctorOnePanel({ onClose }) {
             {aiThread.map((item, i) => {
             if (item.kind === "user") return <UserBubble key={i}>{item.text}</UserBubble>;
             if (item.kind === "bot") return <AIBubble key={i}>{item.text}</AIBubble>;
-            if (item.kind === "recs") return <AIRecs key={i} intro={item.intro} strong={item.strong} partial={item.partial} refine={item.refine} onRefine={aiSend} addedSims={addedSims} setAddedSims={setAddedSims} onToggle={toggleAdded} />;
+            if (item.kind === "recs") return <AIRecs key={i} intro={item.intro} strong={item.strong} partial={item.partial} refine={item.refine} onRefine={aiSend} addedSims={addedSims} setAddedSims={setAddedSims} onToggle={toggleAdded} onOpen={onOpenSim} />;
             return null;
           })}
             {aiBusy &&
@@ -742,10 +761,9 @@ function DoctorOnePanel({ onClose }) {
               <div className="ai-result-group">
                 <div className="ai-sim-list">
                   {merged.map((m, i) =>
-                  <SimCard
+                  <window.ResultSimCard
                     key={`${m.sim.id}-${i}`}
-                    sim={m.sim}
-                    seed={i}
+                    item={aiSimItem(m.sim)}
                     state={getState(m.sim)}
                     onToggle={() => toggleAdded(m.sim.id)} />
                   )}
@@ -796,10 +814,9 @@ function DoctorOnePanel({ onClose }) {
                     </div>
                     <div className="ai-sim-list">
                       {u.sims.map((sim, i) =>
-                      <SimCard
+                      <window.ResultSimCard
                         key={sim.id}
-                        sim={sim}
-                        seed={seedStart + i}
+                        item={aiSimItem(sim)}
                         state={getState(sim)}
                         onToggle={() => toggleAdded(sim.id)} />
                       )}

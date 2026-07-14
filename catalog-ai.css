@@ -154,6 +154,7 @@
 }
 /* sugg-footer removed — no keyboard hints or branding */
 .sugg-empty { padding: 18px 16px; font-size: 13px; color: var(--grey-8); text-align: center; }
+.sugg-empty-plain { padding: 16px; font-size: 13px; color: var(--grey-6); }
 
 /* ── Catalog hero (white) ─────────────────────────────────── */
 .cat-hero-white {
@@ -542,6 +543,31 @@
 }
 .handoff-banner .h-cta:hover { transform: translateY(-1px); background: var(--blue-1); }
 .handoff-banner .h-cta svg { width: 16px; height: 16px; }
+
+/* Related content on the AI zero-results state — shown only when the catalog
+   has simulations that relate (even weakly) to the query. */
+.related-content { margin: 0 0 32px; }
+.related-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 2px 16px;
+}
+.related-spark { display: inline-flex; }
+.related-spark svg { width: 18px !important; height: 18px !important; }
+.related-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--grey-10);
+  margin: 0;
+  letter-spacing: -0.2px;
+  text-wrap: pretty;
+}
+.related-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 
 /* ── Syllabus slide-in panel ─────────────────────────────── */
 .syllabus-backdrop {
@@ -1233,6 +1259,9 @@
   align-items: stretch;
   min-height: 140px;
 }
+.sr-sim-card--clickable { cursor: pointer; transition: box-shadow .16s ease, transform .16s ease, border-color .16s ease; }
+.sr-sim-card--clickable:hover { border-color: var(--blue-5); box-shadow: 0 6px 20px rgba(0,40,80,.12); transform: translateY(-2px); }
+.sr-sim-card--clickable:hover .sr-sim-title { color: var(--blue-8); }
 .sr-sim-thumb { grid-area: thumb; }
 .sr-sim-body  { grid-area: body; }
 .sr-sim-cta   { grid-area: cta; }

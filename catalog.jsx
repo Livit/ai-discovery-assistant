@@ -9,6 +9,15 @@
 const { useState: useCatS, useMemo: useCatM, useEffect: useCatE, useRef: useCatR } = React;
 const ICat = window.LPIcon;
 
+// Shared back button — used across every "back" affordance for consistency.
+function BackButton({ onClick, label = "Back", className = "" }) {
+  return (
+    <button className={"lp-back-btn " + className} onClick={onClick}>
+      <ICat name="arrow-left" /> {label}
+    </button>);
+}
+window.BackButton = BackButton;
+
 // ─────────────────────────────────────────────────────────────
 // DISCIPLINE TOKENS
 // ─────────────────────────────────────────────────────────────
@@ -55,6 +64,15 @@ function aiRecsToResults(res) {
   return [...strong, ...partial];
 }
 
+// Map a raw catalog sim record to a ResultSimCard item.
+function simToItem(s) {
+  return {
+    id: s.c, title: s.n,
+    discipline: discOf(s), level: firstSeg(s.l), duration: s.t,
+    description: trimText(s.o, 150)
+  };
+}
+
 // Tiny sparkle SVG (inline)
 function Sparkle({ size = 16, color }) {
   return (
@@ -91,96 +109,30 @@ function highlight(label, q) {
   return <>{label.slice(0, i)}<span className="hl">{label.slice(i, i + q.length)}</span>{label.slice(i + q.length)}</>;
 }
 
-function SuggestionsDropdown({ q, onPick, onSubmit }) {
-  const { SUGGESTIONS } = window.AI_CATALOG_DATA;
-
-  const trySearches = [
-  "a simulation that helps students understand osmosis before a wet lab",
-  "human factors engineering lab simulation"];
-
-
-  const ql = q.trim().toLowerCase();
-  const filtered = ql ?
-  SUGGESTIONS.filter((s) => s.keywords.includes(ql.split(/\s+/)[0]) || s.label.toLowerCase().includes(ql)) :
-  [];
-
-  const grouped = {
-    sim: filtered.filter((s) => s.kind === "sim").slice(0, 4),
-    outcome: filtered.filter((s) => s.kind === "outcome").slice(0, 3),
-    topic: filtered.filter((s) => s.kind === "topic").slice(0, 3)
-  };
+function SuggestionsDropdown({ q, onPick }) {
+  const ql = q.trim();
+  if (!ql) return null;
+  // Autocomplete: up to 5 simulations whose NAME matches the typed query.
+  const sims = window.SimSearch ? window.SimSearch.nameSuggestions(ql, 5) : [];
 
   return (
     <div className="sugg-pop" role="listbox">
-      {ql && filtered.length === 0 &&
-      <div className="sugg-empty">
-          Press <strong>Enter</strong> to search for <em>"{q}"</em> with AI
-        </div>
-      }
-
-      {grouped.sim.length > 0 &&
+      {sims.length === 0 ?
+      <div className="sugg-empty-plain">No suggestions found</div> :
       <>
-          <div className="sugg-section-head">Simulations & courses</div>
-          {grouped.sim.map((s) =>
-        <div key={s.label} className="sugg-row kind-sim" onMouseDown={() => onPick(s)}>
+          <div className="sugg-section-head">Simulations</div>
+          {sims.map((s) =>
+        <div key={s.c} className="sugg-row kind-sim" onMouseDown={() => onPick(s)}>
               <div className="sugg-ico"><ICat name="book-open" /></div>
               <div>
-                <div className="sugg-label">{highlight(s.label, q)}</div>
-                <div className="sugg-sub">{s.sub}</div>
+                <div className="sugg-label">{highlight(s.n, ql)}</div>
+                <div className="sugg-sub">{firstSeg(s.s)} · {firstSeg(s.l)}</div>
               </div>
               <div className="sugg-kbd">↵</div>
             </div>
         )}
         </>
       }
-
-      {grouped.outcome.length > 0 &&
-      <>
-          <div className="sugg-section-head">
-            Learning outcomes
-          </div>
-          {grouped.outcome.map((s) =>
-        <div key={s.label} className="sugg-row kind-outcome" onMouseDown={() => onPick(s)}>
-              <div>
-                <div className="sugg-label">{highlight(s.label, q)}</div>
-                <div className="sugg-sub">{s.sub}</div>
-              </div>
-              <div className="sugg-kbd">↵</div>
-            </div>
-        )}
-        </>
-      }
-
-      {grouped.topic.length > 0 &&
-      <>
-          <div className="sugg-section-head">
-            Topics & concepts
-          </div>
-          {grouped.topic.map((s) =>
-        <div key={s.label} className="sugg-row kind-topic" onMouseDown={() => onPick(s)}>
-              <div>
-                <div className="sugg-label">{highlight(s.label, q)}</div>
-                <div className="sugg-sub">{s.sub}</div>
-              </div>
-              <div className="sugg-kbd">↵</div>
-            </div>
-        )}
-        </>
-      }
-
-      {/* Always show the "try" examples at the bottom */}
-      <div className="sugg-section-head">
-        Try a natural-language search
-      </div>
-      {trySearches.map((t) =>
-      <div key={t} className="sugg-row kind-outcome" onMouseDown={() => onSubmit(t)}>
-          <div>
-            <div className="sugg-label" style={{ fontStyle: "italic" }}>"{t}"</div>
-          </div>
-          <div className="sugg-kbd">↵</div>
-        </div>
-      )}
-
     </div>);
 
 }
@@ -234,12 +186,12 @@ function CatTopbar({ q, setQ, focused, setFocused, onSubmit, onPick, hasResults,
         <input
           type="text"
           value={q}
-          placeholder="Search by name, topic, learning outcome..."
+          placeholder="Search by name, topic, learning objective..."
           onFocus={() => setFocused(true)}
           onChange={(e) => {setQ(e.target.value);setFocused(true);}}
           onKeyDown={handleKey} />
         
-        {focused && <SuggestionsDropdown q={q} onPick={onPick} onSubmit={onSubmit} />}
+        {focused && <SuggestionsDropdown q={q} onPick={onPick} />}
       </div>
     </div>);
 
@@ -282,17 +234,23 @@ function ResultToast({ variant, text }) {
 // Used in every results page (NL search, zero-state, syllabus, Dr One).
 // Layout: thumbnail │ body (title / desc / meta) │ primary CTA.
 // Supports three button states: "add" (default) | "added" | "in-course".
-function ResultSimCard({ item, state: initialState = "add" }) {
-  const [state, setState] = useCatS(initialState);
+function ResultSimCard({ item, state: stateProp = "add", onOpen, onToggle }) {
+  // Controlled when onToggle is supplied (AI assistant tracks added state
+  // externally); otherwise manages its own add/added state.
+  const controlled = typeof onToggle === "function";
+  const [localState, setLocalState] = useCatS(stateProp);
+  const state = controlled ? stateProp : localState;
   const tone = DISC[item.discipline] || DISC["Biology"];
 
   function toggle() {
     if (state === "in-course") return;
-    setState((s) => s === "added" ? "add" : "added");
+    if (controlled) onToggle(item.id);
+    else setLocalState((s) => s === "added" ? "add" : "added");
   }
+  const open = onOpen ? () => onOpen(item.code || item.id) : undefined;
 
   return (
-    <article className="sr-sim-card">
+    <article className={`sr-sim-card${onOpen ? " sr-sim-card--clickable" : ""}`} onClick={open}>
       <div className="sr-sim-thumb" style={{ background: tone.bg, color: tone.ink }}>
         <ICat name={tone.icon} />
       </div>
@@ -313,7 +271,7 @@ function ResultSimCard({ item, state: initialState = "add" }) {
       <div className="sr-sim-cta">
         <button
           className={`sr-sim-add sr-sim-add--${state}`}
-          onClick={toggle}
+          onClick={(e) => { e.stopPropagation(); toggle(); }}
           disabled={state === "in-course"}>
           {state === "in-course" && <><ICat name="check" /> Already in course</>}
           {state === "added" && <><ICat name="check" /> Added</>}
@@ -323,6 +281,7 @@ function ResultSimCard({ item, state: initialState = "add" }) {
     </article>);
 
 }
+window.ResultSimCard = ResultSimCard;
 
 // ─────────────────────────────────────────────────────────────
 // FILTER SIDEBAR (Figma left rail)
@@ -417,7 +376,7 @@ function FilterSidebar({ filters, setFilter }) {
 // ─────────────────────────────────────────────────────────────
 // SEARCH RESULTS VIEW (Figma layout: title + sidebar + list)
 // ─────────────────────────────────────────────────────────────
-function SearchResultsView({ query, results, interp, intro, onRefineInterp, onBack }) {
+function SearchResultsView({ query, results, interp, intro, onRefineInterp, onBack, onOpen }) {
   const [sort, setSort] = useCatS("Best match");
   const [filters, setFilters] = useCatS({});
   function setFilter(group, value) {
@@ -427,9 +386,7 @@ function SearchResultsView({ query, results, interp, intro, onRefineInterp, onBa
   return (
     <div className="sr-wrap" data-screen-label="03 Search results">
       <div className="sr-back-row">
-        <button className="sr-back-btn" onClick={onBack}>
-          <ICat name="arrow-left" /> Back
-        </button>
+        <window.BackButton onClick={onBack} />
       </div>
 
       <div className="sr-title">
@@ -455,7 +412,7 @@ function SearchResultsView({ query, results, interp, intro, onRefineInterp, onBa
           {results.map((r, i) => {
             return (
               <div key={r.id} className="sr-result-group">
-                <ResultSimCard item={r} />
+                <ResultSimCard item={r} onOpen={onOpen} />
               </div>);
           })}
         </div>
@@ -505,9 +462,7 @@ Unit 4: Genetics and Gene Expression
 
   return (
     <div className="st-root" data-screen-label="04 Syllabus Takeover" role="region" aria-label="Map your syllabus">
-      <button className="st-back" onClick={onClose} aria-label="Back to catalog">
-        <ICat name="arrow-left" /> Back
-      </button>
+      <window.BackButton onClick={onClose} />
       {stage === "input" &&
       <SyllabusInput
         text={text} setText={setText}
@@ -753,12 +708,15 @@ function CatalogPage() {
   const [tab, setTab] = useCatS("Courses");
   const [q, setQ] = useCatS("");
   const [focused, setFocused] = useCatS(false);
-  const [mode, setMode] = useCatS("browse"); // browse | results-nl | results-zero | results-ai
+  const [mode, setMode] = useCatS("browse"); // browse | results-search | results-nl | results-zero | results-ai
   const [interp, setInterp] = useCatS(NL_INTERPRETATION);
+  const [searchResults, setSearchResults] = useCatS([]);
+  const [detailCode, setDetailCode] = useCatS(null);
+  const [prevMode, setPrevMode] = useCatS("results-search");
   const [syllabusOpen, setSyllabusOpen] = useCatS(false);
   const [drOneOpen, setDrOneOpen] = useCatS(false);
   // Live-AI search state
-  const [aiSearch, setAiSearch] = useCatS({ loading: false, query: "", intro: "", results: [], replyText: "" });
+  const [aiSearch, setAiSearch] = useCatS({ loading: false, query: "", intro: "", results: [], replyText: "", related: [] });
 
   useCatE(() => {if (window.lucide) window.lucide.createIcons();});
 
@@ -793,51 +751,32 @@ function CatalogPage() {
     if (main) main.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  // ── Routing for submit — live AI search over the real catalog ──
-  async function onSubmit(query) {
+  // ── Routing for submit — production-like keyword search (Algolia-style).
+  // No natural-language / intent parsing: ranked by attribute order + proximity.
+  function onSubmit(query) {
     query = (query || "").trim();
     if (!query) return;
     setQ(query);
     setFocused(false);
+    const results = (window.SimSearch ? window.SimSearch.search(query) : []).map(simToItem);
+    setSearchResults(results);
+    setMode("results-search");
     const main = document.querySelector(".app-main");
     if (main) main.scrollTo({ top: 0, behavior: "smooth" });
-
-    const live =
-      window.LabsterAI &&
-      window.LabsterAI.isAvailable() &&
-      window.__LP_DESCRIBE_MODE !== "scripted";
-
-    if (!live) { scriptedRoute(query); return; }
-
-    setAiSearch({ loading: true, query, intro: "", results: [], replyText: "" });
-    setMode("results-ai");
-    try {
-      // Search box stays results-first regardless of the assistant's flow mode.
-      const res = await window.LabsterAI.converse([{ role: "user", content: query }], "frictionless");
-      if (res.type === "recommendations") {
-        const results = aiRecsToResults(res);
-        if (results.length === 0) {
-          setAiSearch({ loading: false, query, intro: "", results: [],
-            replyText: res.intro || "No simulations cleared the match threshold for that search." });
-        } else {
-          setAiSearch({ loading: false, query, intro: res.intro, results, replyText: "" });
-        }
-      } else {
-        setAiSearch({ loading: false, query, intro: "", results: [], replyText: res.text || "" });
-      }
-    } catch (e) {
-      // Network/AI unavailable — fall back to the canned demo routing.
-      scriptedRoute(query);
-    }
   }
 
+  // Picking a dropdown suggestion runs a keyword search for that simulation's name.
   function onPick(s) {
-    // For a topic/outcome, treat label as a query that goes to NL results
-    if (s.kind === "outcome" || s.kind === "topic") {
-      onSubmit(s.label);
-    } else {
-      onSubmit(s.label);
-    }
+    onSubmit(s.n);
+  }
+
+  // Open the simulation detail page from a result card.
+  function openDetail(codeId) {
+    setPrevMode(mode);
+    setDetailCode(codeId);
+    setMode("sim-detail");
+    const main = document.querySelector(".app-main");
+    if (main) main.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function backToCatalog() {
@@ -845,20 +784,16 @@ function CatalogPage() {
     setQ("");
   }
 
-  // ── Filtered courses (only in browse mode) ──
-  const filtered = useCatM(() =>
-  CATALOG.filter((c) => !q ||
-  c.title.toLowerCase().includes(q.toLowerCase()) ||
-  c.description.toLowerCase().includes(q.toLowerCase())
-  ), [q, CATALOG]
-  );
+  // ── Browse courses — the catalog homepage shows the full set; the search
+  // query only drives the results view, never this grid. ──
+  const filtered = CATALOG;
   const grouped = useCatM(() =>
   DISCIPLINES.map((d) => [d, filtered.filter((c) => c.disciplines[0] === d)]).
   filter(([, list]) => list.length > 0),
   [filtered, DISCIPLINES]
   );
 
-  const hasResults = mode === "results-nl" || mode === "results-zero" || mode === "results-ai";
+  const hasResults = mode === "results-search" || mode === "sim-detail" || mode === "results-nl" || mode === "results-zero" || mode === "results-ai";
 
   return (
     <div className="page" data-screen-label="02 Catalog" style={{ padding: 0, maxWidth: "none" }}>
@@ -875,7 +810,14 @@ function CatalogPage() {
           onPick={onPick}
           hasResults={hasResults}
           onOpenDrOne={() => setDrOneOpen(true)} />
-      <window.DoctorOnePanel onClose={() => setDrOneOpen(false)} />
+      <div style={{ display: mode === "sim-detail" ? "none" : "contents" }}>
+      <window.DoctorOnePanel onClose={() => setDrOneOpen(false)} onOpenSim={openDetail} />
+      </div>
+      {mode === "sim-detail" && window.SimDetailPage &&
+        <window.SimDetailPage
+          code={detailCode}
+          onBack={() => setMode(prevMode || "browse")} />
+      }
       </> :
 
       <>
@@ -928,6 +870,35 @@ function CatalogPage() {
         </>
         }
 
+      {/* ── KEYWORD SEARCH RESULTS (production-like, no NL/intent) ─ */}
+      {mode === "results-search" &&
+        (searchResults.length > 0 ?
+        <SearchResultsView
+          query={q}
+          results={searchResults}
+          intro={`Showing results for "${q}"`}
+          onOpen={openDetail}
+          onBack={backToCatalog} /> :
+
+        <div className="search-results-wrap" data-screen-label="03 Search results">
+          <div className="sr-back-row" style={{ maxWidth: "none" }}>
+            <window.BackButton onClick={backToCatalog} />
+          </div>
+          <div className="zero-state" style={{ marginTop: 32, marginBottom: 64 }}>
+            <div className="icon-wrap"><ICat name="search-x" /></div>
+            <h3>No results for "{q}"</h3>
+            <p>Try a different keyword or check your spelling. You can search by simulation name, topic, or learning objective.</p>
+          </div>
+        </div>)
+        }
+
+      {/* ── SIMULATION DETAIL PAGE ──────────────────────────── */}
+      {mode === "sim-detail" && window.SimDetailPage &&
+        <window.SimDetailPage
+          code={detailCode}
+          onBack={() => setMode(prevMode || "results-search")} />
+        }
+
       {/* ── NL RESULTS MODE (scripted demo) ─────────────────── */}
       {mode === "results-nl" &&
         <SearchResultsView
@@ -944,9 +915,7 @@ function CatalogPage() {
         (aiSearch.loading ?
         <div className="search-results-wrap" data-screen-label="03 Search results (AI)">
             <div className="sr-back-row" style={{ maxWidth: "none" }}>
-              <button className="sr-back-btn" onClick={backToCatalog}>
-                <ICat name="arrow-left" /> Back
-              </button>
+              <window.BackButton onClick={backToCatalog} />
             </div>
             <div className="ai-search-loading">
               <div className="loading-orb"><Sparkle size={38} color="#fff" /></div>
@@ -966,26 +935,35 @@ function CatalogPage() {
         <div className="search-results-wrap">
             <div className="search-context">
               <div className="lhs">
-                <span className="back" onClick={backToCatalog}><ICat name="arrow-left" /> Back to catalog</span>
+                <window.BackButton onClick={backToCatalog} />
                 &nbsp;&nbsp;·&nbsp;&nbsp;Searched for "{aiSearch.query}"
               </div>
             </div>
-            <div className="zero-state">
-              <div className="icon-wrap"><ICat name="search-x" /></div>
-              <h3>No strong matches for that search</h3>
-              <p>{aiSearch.replyText || "Try broadening your description, or map your full syllabus so we can find adjacent coverage and flag gaps."}</p>
-            </div>
-            <div className="handoff-banner">
-              <div className="h-illus"><Sparkle size={30} color="#fff" /></div>
-              <div className="h-body">
-                <div className="h-eyebrow">Need a fuller picture?</div>
-                <h3 className="h-title">Upload your syllabus and we'll map your entire curriculum</h3>
-                <p className="h-sub">See exactly which units we cover, which need adjustment and which topics we should prioritise next.</p>
-              </div>
-              <button className="h-cta" onClick={() => setSyllabusOpen(true)}>
-                Map my syllabus <ICat name="arrow-right" />
-              </button>
-            </div>
+            {(() => {
+            const related = aiSearch.related || [];
+            const hasRelated = related.length > 0;
+            return (
+              <>
+                <div className="zero-state" style={{ marginTop: 32, marginBottom: 64 }}>
+                  <div className="icon-wrap"><ICat name="search-x" /></div>
+                  <h3>No strong matches for that search</h3>
+                  <p>Please try typing something different or look at our recommended content.</p>
+                </div>
+
+                {hasRelated &&
+                <div className="related-content">
+                  <div className="related-head">
+                    <span className="related-spark"><Sparkle size={18} color="#006FCC" /></span>
+                    <h4 className="related-title">Maybe this related content can help with your teaching</h4>
+                  </div>
+                  <div className="related-grid">
+                    {related.map((s) => <ResultSimCard key={s.c} item={simToItem(s)} onOpen={openDetail} />)}
+                  </div>
+                </div>
+                }
+              </>);
+
+          })()}
           </div>)
         }
 
@@ -994,7 +972,7 @@ function CatalogPage() {
         <div className="search-results-wrap">
           <div className="search-context">
             <div className="lhs">
-              <span className="back" onClick={backToCatalog}><ICat name="arrow-left" /> Back to catalog</span>
+              <window.BackButton onClick={backToCatalog} />
               &nbsp;&nbsp;·&nbsp;&nbsp;Searched for "{q}"
             </div>
           </div>

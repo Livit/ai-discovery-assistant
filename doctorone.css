@@ -565,6 +565,9 @@
   border-color: var(--blue-5);
   box-shadow: 0 2px 8px rgba(28,31,34,0.05);
 }
+.ai-sim-card--clickable { cursor: pointer; transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease; }
+.ai-sim-card--clickable:hover { border-color: var(--blue-5); box-shadow: 0 6px 20px rgba(0,40,80,.12); transform: translateY(-2px); }
+.ai-sim-card--clickable:hover .ai-sim-title { color: var(--blue-8); }
 .ai-sim-thumb {
   width: 160px;
   height: 100px;

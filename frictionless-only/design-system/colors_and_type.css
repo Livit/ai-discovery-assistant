@@ -1,0 +1,293 @@
+/* =============================================================
+   Labster Foundation Design System — colors & type tokens
+   ============================================================= */
+
+/* ---------- Webfonts ----------
+   Hanken Grotesk = local variable font (brand-supplied).
+   All others = Google Fonts (still substitutes — see README caveats).
+*/
+@font-face {
+  font-family: 'Hanken Grotesk';
+  src: url('fonts/HankenGrotesk-VariableFont_wght.ttf') format('truetype-variations'),
+       url('fonts/HankenGrotesk-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Hanken Grotesk';
+  src: url('fonts/HankenGrotesk-Italic-VariableFont_wght.ttf') format('truetype-variations'),
+       url('fonts/HankenGrotesk-Italic-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=Archivo:wght@400;600;700&family=Roboto+Mono:wght@500&display=swap');
+
+:root {
+  /* =========================================================
+     PRIMARY — Blue (brand / emphasis)
+     ========================================================= */
+  --blue-10: hsl(207, 100%, 8%);    /* #00182E */
+  --blue-9:  hsl(207, 100%, 17%);   /* #002F56 — brand navy */
+  --blue-8:  hsl(207, 100%, 22%);   /* #003D70 */
+  --blue-7:  hsl(207, 100%, 30%);
+  --blue-6:  hsl(207, 100%, 40%);   /* #006FCC — base action */
+  --blue-5:  hsl(207, 100%, 60%);   /* #33A2FF */
+  --blue-4:  hsl(207, 100%, 80%);
+  --blue-3:  hsl(207, 100%, 90%);   /* #CCE8FF */
+  --blue-2:  hsl(207, 100%, 95%);   /* #E5F3FF */
+  --blue-1:  hsl(207, 100%, 98%);   /* #F5FAFF */
+
+  /* Primary shorthands (legacy brand names) */
+  --dark-blue:  var(--blue-10);
+  --brand-blue: var(--blue-8);
+  --blue:       var(--blue-6);
+  --light-blue: var(--blue-1);
+
+  /* =========================================================
+     GREEN — success / positive states
+     ========================================================= */
+  --green-10: hsl(158, 75%, 15%);
+  --green-9:  hsl(158, 75%, 20%);   /* $dark-green */
+  --green-8:  hsl(158, 75%, 25%);
+  --green-7:  hsl(158, 75%, 30%);
+  --green-6:  hsl(158, 75%, 30%);   /* #19AF78 base */
+  --green-5:  hsl(158, 75%, 50%);
+  --green-4:  hsl(158, 75%, 65%);
+  --green-3:  hsl(158, 75%, 75%);
+  --green-2:  hsl(158, 75%, 85%);
+  --green-1:  hsl(158, 75%, 95%);
+
+  --dark-green:  var(--green-9);
+  --green:       var(--green-6);
+  --light-green: var(--green-1);
+
+  /* =========================================================
+     RED — error / destructive states
+     ========================================================= */
+  --red-10: hsl(351, 81%, 15%);
+  --red-9:  hsl(351, 81%, 25%);
+  --red-8:  hsl(351, 81%, 40%);   /* #B9132C */
+  --red-7:  hsl(351, 81%, 59%);   /* #EB415A — accent red */
+  --red-6:  hsl(351, 81%, 65%);
+  --red-5:  hsl(351, 81%, 75%);
+  --red-4:  hsl(351, 81%, 85%);
+  --red-3:  hsl(351, 81%, 90%);
+  --red-2:  hsl(351, 81%, 95%);
+  --red-1:  hsl(351, 81%, 97%);
+
+  --dark-red:  var(--red-8);
+  --red:       var(--red-7);
+  --light-red: var(--red-1);
+
+  /* =========================================================
+     YELLOW — warnings (mirrors blue curve — Figma spec)
+     ========================================================= */
+  --yellow-10: hsl(42, 100%, 10%);
+  --yellow-9:  hsl(42, 100%, 30%);   /* #996800 */
+  --yellow-8:  hsl(42, 100%, 44%);   /* #DF9706 — accent (if needed) */
+  --yellow-7:  hsl(42, 97%, 55%);    /* #FBBC19 */
+  --yellow-6:  hsl(42, 95%, 70%);    /* #FBCB6A */
+  --yellow-5:  hsl(42, 100%, 65%);
+  --yellow-4:  hsl(42, 100%, 78%);
+  --yellow-3:  hsl(42, 100%, 88%);
+  --yellow-2:  hsl(42, 100%, 94%);
+  --yellow-1:  hsl(42, 100%, 97%);
+
+  /* =========================================================
+     NEUTRAL — grey scale (cool, slightly blue)
+     ========================================================= */
+  --grey-10: hsl(210, 13%, 12%);   /* #1B1F23 — body text */
+  --grey-9:  hsl(207, 12%, 32%);   /* #47515A */
+  --grey-8:  hsl(205, 12%, 43%);   /* #61717C — secondary text */
+  --grey-7:  hsl(208, 12%, 60%);   /* #8E9AA4 — tertiary */
+  --grey-6:  hsl(207, 11%, 75%);   /* #B8C0C6 */
+  --grey-5:  hsl(207, 12%, 80%);   /* #C6CDD2 — borders strong */
+  --grey-4:  hsl(207, 12%, 85%);   /* #D5D9DD */
+  --grey-3:  hsl(208, 12%, 90%);   /* #E2E6E9 — borders */
+  --grey-2:  hsl(210, 12%, 94%);   /* #EEF0F1 — surfaces */
+  --grey-1:  hsl(220, 12%, 97%);   /* #F6F7F8 — app bg */
+
+  /* Absolutes */
+  --black: #1B1F23;   /* near-black, never pure #000 body */
+  --pure-black: #000000;
+  --white: #FFFFFF;
+
+  /* =========================================================
+     SEMANTIC — foreground / background / border roles
+     ========================================================= */
+  --fg-primary:   var(--grey-10);    /* body / headings */
+  --fg-secondary: var(--grey-8);     /* supporting copy */
+  --fg-tertiary:  var(--grey-7);     /* captions, hints */
+  --fg-disabled:  var(--grey-6);
+  --fg-inverse:   var(--white);
+  --fg-brand:     var(--blue-9);     /* links, brand text */
+  --fg-action:    var(--blue-6);
+  --fg-success:   var(--green-7);
+  --fg-danger:    var(--red-8);
+  --fg-warning:   var(--yellow-8);
+
+  --bg-canvas:    var(--white);
+  --bg-subtle:    var(--grey-1);
+  --bg-muted:     var(--grey-2);
+  --bg-brand:     var(--blue-9);
+  --bg-brand-deep:var(--blue-10);
+  --bg-action:    var(--blue-6);
+  --bg-success:   var(--green-1);
+  --bg-danger:    var(--red-1);
+  --bg-warning:   var(--yellow-1);
+
+  --border-subtle: var(--grey-3);
+  --border-default:var(--grey-4);
+  --border-strong: var(--grey-5);
+  --border-action: var(--blue-6);
+  --border-focus:  var(--blue-5);
+
+  /* =========================================================
+     TYPE — families, sizes, weights
+     ========================================================= */
+  --font-display: 'Hanken Grotesk', system-ui, sans-serif;            /* headings + UI */
+  --font-body:    'Hanken Grotesk', system-ui, sans-serif;            /* body */
+  --font-accent:  'Hanken Grotesk', system-ui, sans-serif;            /* labels / small caps */
+  --font-alt:     'Hanken Grotesk', system-ui, sans-serif;            /* alt display (alias) */
+  --font-mono:    'Roboto Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Type scale (px) — from Figma metadata: 11,12,14,16,18,20,24,32,40,56,70 */
+  --text-xs:  11px;
+  --text-sm:  12px;
+  --text-md:  14px;
+  --text-base:16px;
+  --text-lg:  18px;
+  --text-xl:  20px;
+  --text-2xl: 24px;
+  --text-3xl: 32px;
+  --text-4xl: 40px;
+  --text-5xl: 56px;
+  --text-6xl: 70px;
+
+  --fw-regular:  400;
+  --fw-medium:   500;
+  --fw-semibold: 600;
+  --fw-bold:     700;
+
+  /* Letter-spacing — Labster uses slightly tight tracking on headings */
+  --tracking-tight: -0.3px;
+  --tracking-snug:  -0.2px;
+  --tracking-normal:0;
+  --tracking-wide:  1px;   /* all-caps labels */
+
+  /* =========================================================
+     SPACING — 4-pt base (8pt major)
+     ========================================================= */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  24px;
+  --space-6:  32px;
+  --space-7:  48px;
+  --space-8:  64px;
+  --space-9:  96px;
+  --space-10: 128px;
+
+  /* =========================================================
+     RADIUS — 4 core steps + pill (Figma: Radius scale)
+     ========================================================= */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 32px;
+  --radius-pill: 999px;
+
+  /* =========================================================
+     ELEVATION — drop-shadows (positive scale from Figma)
+     ========================================================= */
+  --shadow-0:  0 0 0 1px rgba(28,31,34,0.05);                       /* hairline */
+  --shadow-1:  0 1px 2px rgba(28,31,34,0.05), 0 1px 1px rgba(28,31,34,0.04);
+  --shadow-2:  0 2px 6px rgba(28,31,34,0.06), 0 1px 2px rgba(28,31,34,0.04);
+  --shadow-3:  0 8px 24px rgba(25,32,56,0.08), 0 2px 4px rgba(25,32,56,0.04);
+  --shadow-4:  0 16px 40px rgba(25,32,56,0.12), 0 4px 8px rgba(25,32,56,0.06);
+  --shadow-brand: 0 8px 24px rgba(0,111,204,0.2);
+  --shadow-danger:0 8px 24px rgba(185,19,44,0.2);
+
+  /* focus ring */
+  --ring-action: 0 0 0 3px rgba(51,162,255,0.4);
+  --ring-danger: 0 0 0 3px rgba(235,65,90,0.35);
+
+  /* =========================================================
+     MOTION
+     ========================================================= */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized: cubic-bezier(0.3, 0, 0, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 320ms;
+}
+
+/* =========================================================
+   BASE ELEMENT STYLES
+   ========================================================= */
+html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--fw-regular);
+  line-height: 1.5;
+  color: var(--fg-primary);
+  background: var(--bg-canvas);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  color: var(--fg-primary);
+  margin: 0 0 0.4em 0;
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.15;
+  font-weight: var(--fw-bold);
+}
+h1 { font-size: var(--text-5xl); }
+h2 { font-size: var(--text-4xl); }
+h3 { font-size: var(--text-3xl); }
+h4 { font-size: var(--text-2xl); }
+h5 { font-size: var(--text-xl); letter-spacing: var(--tracking-snug); }
+h6 { font-size: var(--text-lg); letter-spacing: var(--tracking-snug); }
+
+p  { margin: 0 0 1em 0; line-height: 1.55; }
+
+small { font-size: var(--text-sm); color: var(--fg-secondary); }
+
+.eyebrow, .overline {
+  font-family: var(--font-accent);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--fg-secondary);
+}
+
+a {
+  color: var(--fg-action);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-standard);
+}
+a:hover { color: var(--blue-8); text-decoration: underline; }
+
+code, kbd, pre {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+}
+code {
+  background: var(--bg-muted);
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  color: var(--grey-9);
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--border-subtle);
+  margin: var(--space-5) 0;
+}

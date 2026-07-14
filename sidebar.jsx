@@ -66,7 +66,7 @@ function Sidebar({ active, onNav, license, onLicense, onAccountAction, activeCou
   const { LICENSES, USER } = window.LP_DATA;
   const [licOpen, setLicOpen] = useState(false);
   const [acctOpen, setAcctOpen] = useState(false);
-  const [coursesOpen, setCoursesOpen] = useState(true);
+  const [coursesOpen, setCoursesOpen] = useState(false);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [order, setOrder] = useState(loadOrder);
   const [dragKey, setDragKey] = useState(null);
