@@ -25,7 +25,7 @@ jobs:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: "true"
       - name: Bump version and push tag
         id: tag_version
-        uses: mathieudutour/github-tag-action@v6.2
+        uses: livit/github-tag-action@v1.3.0
         if: ${{ env.SKIP_TAG == 'false' }}
         with:
           tag_prefix: ""
